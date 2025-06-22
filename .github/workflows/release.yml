@@ -62,6 +62,8 @@ jobs:
 
       - name: Release
         env:
+          COREPACK_ENABLE_AUTO_PIN: 0
+          COREPACK_ENABLE_STRICT: 0
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: corepack pnpm release
