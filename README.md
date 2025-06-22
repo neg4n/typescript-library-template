@@ -48,14 +48,19 @@ The script will guide you to set up these secrets if missing:
 
 **NPM_TOKEN** (for publishing):
 ```bash
-# Create NPM token (granular access recommended)
-npm token create --type=granular --scope=@your-scope
+# Generate NPM token with OTP for enhanced security
+pnpm token create --otp=<YOUR_OTP> --registry=https://registry.npmjs.org/
+
+# Set the token as repository secret
 gh secret set NPM_TOKEN --body "your-npm-token-here"
 ```
 
 **ACTIONS_BRANCH_PROTECTION_BYPASS** (for automated releases):
 ```bash
 # Create Personal Access Token with 'repo' permissions
+# Visit: https://github.com/settings/personal-access-tokens/new
+
+# Set the PAT as repository secret
 gh secret set ACTIONS_BRANCH_PROTECTION_BYPASS --body "your-pat-token-here"
 ```
 

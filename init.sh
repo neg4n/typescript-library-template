@@ -159,9 +159,7 @@ configure_repository() {
 # Create repository ruleset
 create_ruleset() {
     # Check if ruleset already exists
-    local existing_rulesets=$(gh api repos/${OWNER}/${REPO_NAME}/rulesets --jq '.[].name' 2>/dev/null | grep -c "Main Branch Protection" || echo "0")
-    
-    if [[ "$existing_rulesets" -gt 0 ]]; then
+    if gh api repos/${OWNER}/${REPO_NAME}/rulesets --jq '.[].name' 2>/dev/null | grep -q "Main Branch Protection" 2>/dev/null; then
         success "Branch protection ruleset already exists"
         echo " Target branch: main"
         echo " Pull requests: required (1 approval)"
@@ -267,16 +265,20 @@ check_secrets() {
     
     if [[ ${#missing_secrets[@]} -gt 0 ]]; then
         echo
-        echo " To add missing secrets:"
+        echo -e " ${BLUE}Setup Instructions:${NC}"
         for secret in "${missing_secrets[@]}"; do
             case $secret in
                 "NPM_TOKEN")
-                    echo "   npm token create --type=granular"
-                    echo "   gh secret set $secret"
+                    echo -e "   ${GRAY}# Generate NPM token with OTP${NC}"
+                    echo -e "   ${WHITE}pnpm token create --otp=<YOUR_OTP> --registry=https://registry.npmjs.org/${NC}"
+                    echo -e "   ${WHITE}gh secret set $secret${NC}"
+                    echo
                     ;;
                 "ACTIONS_BRANCH_PROTECTION_BYPASS")
-                    echo "   Create PAT with 'repo' scope"
-                    echo "   gh secret set $secret"
+                    echo -e "   ${GRAY}# Create Personal Access Token${NC}"
+                    echo -e "   ${GRAY}# see README.md for more details${NC}"
+                    echo -e "   ${WHITE}gh secret set $secret${NC}"
+                    echo
                     ;;
             esac
         done
