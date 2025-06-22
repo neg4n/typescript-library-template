@@ -2,21 +2,21 @@
  * A simple greeting function for testing the build process
  */
 export function greet(name: string): string {
-  return `Hello, ${name}!`;
+  return `Hello, ${name}!`
 }
 
 /**
  * A utility function that demonstrates tree-shaking
  */
 export function add(a: number, b: number): number {
-  return a + b;
+  return a + b
 }
 
 /**
  * Another utility function for tree-shaking demonstration
  */
 export function multiply(a: number, b: number): number {
-  return a * b;
+  return a * b
 }
 
 /**
@@ -26,4 +26,4 @@ export default {
   greet,
   add,
   multiply,
-};
+}
