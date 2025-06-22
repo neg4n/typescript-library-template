@@ -15,55 +15,48 @@ An opinionated production-ready TypeScript library template with automated build
 
 ## Features
 
-- **Dual Package Support** - Outputs CommonJS and ESM builds
-- **Type Safety** - Extremely strict TypeScript configuration
-- **Build Validation** - Uses `@arethetypeswrong/cli` to check package exports
-- **Automated Testing** - Vitest with coverage reporting
-- **Code Quality** - Biome linting and formatting with pre-commit hooks
-- **Automated Releases** - Semantic versioning with changelog generation
-- **CI/CD Pipeline** - GitHub Actions for testing and publishing
+- 📦 **Dual Package Support** - Outputs CommonJS and ESM builds
+- 🛡️ **Type Safety** - Extremely strict TypeScript configuration
+- ✅ **Build Validation** - Uses `@arethetypeswrong/cli` to check package exports
+- 🧪 **Automated Testing** - Vitest with coverage reporting
+- 🎨 **Code Quality** - Biome linting and formatting with pre-commit hooks
+- 🚀 **Automated Releases** - Semantic versioning with changelog generation
+- ⚙️ **CI/CD Pipeline** - GitHub Actions for testing and publishing
+- 🔧 **One-Click Setup** - Automated repository configuration with `init.sh`
 
 ## Setup
 
-### 1. NPM Token
+### 1. Quick Start
 
-Create an NPM access token and add it to GitHub secrets:
+Run the initialization script to automatically configure your repository:
 
+```bash
+# One-command setup
+./init.sh
+```
+
+This script will:
+- 🔒 **Create repository rulesets** for branch protection (linear history, PR reviews)
+- 🚫 **Disable unnecessary features** (wikis, projects, squash/merge commits)
+- ⚙️ **Configure merge settings** (rebase-only workflow)
+- ✅ **Verify GitHub Actions** are enabled
+- 🔑 **Check required secrets** and provide setup instructions
+
+### 2. Required Secrets
+
+The script will guide you to set up these secrets if missing:
+
+**NPM_TOKEN** (for publishing):
 ```bash
 # Create NPM token (granular access recommended)
 npm token create --type=granular --scope=@your-scope
-
-# Add to GitHub secrets using GitHub CLI
 gh secret set NPM_TOKEN --body "your-npm-token-here"
 ```
 
-### 2. Branch Protection Bypass Token
-
-For automated releases to work with branch protection, create a Personal Access Token:
-
-1. Go to GitHub Settings → Developer settings → Personal access tokens
-2. Create a token with `repo` permissions
-3. Add to GitHub secrets:
-
+**ACTIONS_BRANCH_PROTECTION_BYPASS** (for automated releases):
 ```bash
+# Create Personal Access Token with 'repo' permissions
 gh secret set ACTIONS_BRANCH_PROTECTION_BYPASS --body "your-pat-token-here"
-```
-
-### 3. Branch Protection Rules
-
-Set up branch protection for the `main` branch:
-
-```bash
-# Enable branch protection with required checks
-gh api repos/:owner/:repo/branches/main/protection \
-  --method PUT \
-  --field required_status_checks='{"strict":true,"contexts":["test"]}' \
-  --field enforce_admins=true \
-  --field required_pull_request_reviews='{"required_approving_review_count":1,"dismiss_stale_reviews":true,"require_code_owner_reviews":false}' \
-  --field restrictions=null \
-  --field required_linear_history=true \
-  --field allow_force_pushes=false \
-  --field allow_deletions=false
 ```
 
 #### Why Linear History?
