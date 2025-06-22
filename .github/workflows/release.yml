@@ -1,29 +1,32 @@
-name: "Test & Coverage"
+name: "Release"
 on:
-  pull_request:
   push:
-    branches: [main]
+    branches:
+      - main
+
+permissions:
+  contents: read
 
 jobs:
-  test:
+  release:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [20, 22]
-
     permissions:
-      contents: read
+      contents: write 
+      issues: write
       pull-requests: write
+      id-token: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          check-latest: true
+          fetch-depth: 0
 
-      - name: Install Node.js ${{ matrix.node-version }}
+      - name: Install Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          check-latest: true
+          node-version: 20
           cache: "pnpm"
 
       - name: Enable Corepack
@@ -51,9 +54,14 @@ jobs:
       - name: Run linter
         run: corepack pnpm lint
 
-      - name: Run tests with coverage
-        run: corepack pnpm test:coverage
+      - name: Run tests
+        run: corepack pnpm test
 
-      - name: Report Coverage
-        if: always()
-        uses: davelosert/vitest-coverage-report-action@v2
+      - name: Build package
+        run: corepack pnpm build
+
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: corepack pnpm release
