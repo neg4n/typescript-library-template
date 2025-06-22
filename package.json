@@ -26,13 +26,11 @@
     "dev": "rollup -c --watch",
     "typecheck": "tsc --noEmit",
     "attw": "attw --pack .",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "biome lint .",
-    "lint:fix": "biome lint --write .",
-    "format": "biome format .",
-    "format:fix": "biome format --write .",
-    "check": "biome check .",
-    "check:fix": "biome check --write ."
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write ."
   },
   "keywords": [],
   "author": "",
@@ -49,6 +47,7 @@
     "rollup-plugin-dts": "^6.2.1",
     "tslib": "^2.8.1",
     "type-fest": "^4.41.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "3.2.4"
   }
 }
