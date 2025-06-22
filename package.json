@@ -1,7 +1,7 @@
 {
   "name": "typescript-library-template",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.1",
+  "description": "A neg4n's template for creating TypeScript libraries",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.esm.js",
@@ -39,9 +39,17 @@
   "lint-staged": {
     "*.{js,ts,json}": "biome check --write --no-errors-on-unmatched"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "typescript",
+    "library",
+    "template"
+  ],
+  "author": {
+    "email": "neg4n@icloud.com",
+    "name": "neg4n",
+    "url": "https://github.com/neg4n"
+  },
+  "license": "MIT",
   "packageManager": "pnpm@10.8.0",
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.2",
