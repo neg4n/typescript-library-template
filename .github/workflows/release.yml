@@ -20,7 +20,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          check-latest: true
           token: ${{ secrets.ACTIONS_BRANCH_PROTECTION_BYPASS }}
           fetch-depth: 0
 
