@@ -26,7 +26,13 @@
     "dev": "rollup -c --watch",
     "typecheck": "tsc --noEmit",
     "attw": "attw --pack .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format .",
+    "format:fix": "biome format --write .",
+    "check": "biome check .",
+    "check:fix": "biome check --write ."
   },
   "keywords": [],
   "author": "",
@@ -34,6 +40,7 @@
   "packageManager": "pnpm@10.8.0",
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.2",
+    "@biomejs/biome": "2.0.4",
     "@rollup/plugin-commonjs": "^28.0.6",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-terser": "^0.4.4",
