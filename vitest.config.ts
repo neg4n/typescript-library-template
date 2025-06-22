@@ -11,7 +11,7 @@ export default defineConfig({
       tsconfig: './tsconfig.json',
     },
     coverage: {
-      reporter: ['text', 'html', 'lcov'],
+      reporter: ['text', 'html', 'lcov', 'json-summary', 'json'],
       exclude: [
         'node_modules/',
         'dist/',
