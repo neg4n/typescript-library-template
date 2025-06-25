@@ -23,6 +23,10 @@ jobs:
           token: ${{ secrets.ACTIONS_BRANCH_PROTECTION_BYPASS }}
           fetch-depth: 0
 
+      - name: Install pnpm with version specified in 'packageManager'
+        uses: pnpm/action-setup@v4
+
+
       - name: Install Node.js 20
         uses: actions/setup-node@v4
         with:
