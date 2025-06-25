@@ -3,7 +3,7 @@
 # TypeScript Library Template Initialization Script
 # Configures repository settings, branch protection, and GitHub features
 
-set -euo pipefail
+set -uo pipefail
 
 # Colors and formatting
 readonly GREEN='\033[0;32m'
@@ -41,6 +41,96 @@ error() {
     echo
     echo " For help: https://cli.github.com/manual"
     exit 1
+}
+
+# Graceful error handling for non-critical operations
+handle_error() {
+    local operation="$1"
+    local error_msg="$2"
+    echo -e " ${YELLOW}!${NC} ${operation} failed: ${error_msg}"
+    echo -e " ${GRAY}→ Continuing with remaining setup steps...${NC}"
+    echo
+}
+
+# Log detailed errors with beautiful formatting
+log_error() {
+    local operation="$1"
+    local error_file="$2"
+    if [[ -f "$error_file" && -s "$error_file" ]]; then
+        echo -e " ${YELLOW}!${NC} ${operation} failed with details:"
+        
+        # Get terminal width and calculate box width
+        local term_width=$(tput cols 2>/dev/null || echo 80)
+        local box_width=$((term_width - 4))  # Account for padding
+        
+        # Create top border
+        local border=$(printf '─%.0s' $(seq 1 $box_width))
+        echo -e " ${GRAY}┌${border}┐${NC}"
+        # Process each line with text balancing
+        while IFS= read -r line; do
+            # Break long lines into balanced chunks
+            if [[ ${#line} -le $((box_width - 2)) ]]; then
+                # Single line fits
+                printf " ${GRAY}│${NC} %-*s ${GRAY}│${NC}\n" $((box_width - 2)) "$line"
+            else
+                # Multi-line text balancing
+                local words=($line)
+                local current_line=""
+                local lines=()
+                
+                for word in "${words[@]}"; do
+                    if [[ ${#current_line} -eq 0 ]]; then
+                        current_line="$word"
+                    elif [[ $((${#current_line} + ${#word} + 1)) -le $((box_width - 2)) ]]; then
+                        current_line="$current_line $word"
+                    else
+                        lines+=("$current_line")
+                        current_line="$word"
+                    fi
+                done
+                [[ -n "$current_line" ]] && lines+=("$current_line")
+                
+                # Balance the lines by redistributing words if needed
+                if [[ ${#lines[@]} -gt 1 ]]; then
+                    local total_chars=0
+                    for balanced_line in "${lines[@]}"; do
+                        total_chars=$((total_chars + ${#balanced_line}))
+                    done
+                    local avg_chars=$((total_chars / ${#lines[@]}))
+                    
+                    # Simple balancing: if last line is much shorter, redistribute
+                    local last_idx=$((${#lines[@]} - 1))
+                    local last_line="${lines[$last_idx]}"
+                    if [[ ${#last_line} -lt $((avg_chars / 2)) && ${#lines[@]} -gt 1 ]]; then
+                        local prev_idx=$((${#lines[@]} - 2))
+                        local prev_line="${lines[$prev_idx]}"
+                        local prev_words=($prev_line)
+                        local last_words=($last_line)
+                        
+                        if [[ ${#prev_words[@]} -gt 2 ]]; then
+                            local prev_word_idx=$((${#prev_words[@]} - 1))
+                            local move_word="${prev_words[$prev_word_idx]}"
+                            unset prev_words[$prev_word_idx]
+                            lines[$prev_idx]="${prev_words[*]}"
+                            lines[$last_idx]="$move_word ${last_words[*]}"
+                        fi
+                    fi
+                fi
+                
+                # Print balanced lines
+                for balanced_line in "${lines[@]}"; do
+                    printf " ${GRAY}│${NC} %-*s ${GRAY}│${NC}\n" $((box_width - 2)) "$balanced_line"
+                done
+            fi
+        done < "$error_file"
+        
+        # Create bottom border
+        echo -e " ${GRAY}└${border}┘${NC}"
+        echo -e " ${GRAY}→ Continuing with remaining setup steps...${NC}"
+        echo
+    else
+        handle_error "$operation" "Unknown error occurred"
+    fi
 }
 
 # Minimal separator
@@ -130,10 +220,10 @@ configure_repository() {
     if [[ $repo_exit_code -eq 0 ]]; then
         success "Repository settings configured"
         echo " Wikis: disabled, Projects: disabled"
-        echo " Merge methods: rebase only"
+        echo " Merge methods: rebase only (repository level)"
         echo " Auto-delete branches: enabled"
     else
-        warning "Repository settings failed (admin permissions required)"
+        log_error "Repository settings" "$repo_settings_file"
     fi
     
     # Wait for actions check and process result
@@ -148,7 +238,7 @@ configure_repository() {
             warning "GitHub Actions disabled"
             ;;
         *)
-            warning "Unable to verify Actions status"
+            handle_error "GitHub Actions verification" "Unable to determine status"
             ;;
     esac
     
@@ -163,17 +253,22 @@ create_ruleset() {
         success "Branch protection ruleset already exists"
         echo " Target branch: main"
         echo " Pull requests: required (1 approval)"
-        echo " Status checks: test pipeline required"
+        echo " Merge methods: rebase only (ruleset level)"
         echo " Linear history: enforced"
         echo " Force pushes: blocked"
         echo " Stale reviews: auto-dismissed"
+        echo " Bypass: repository admins allowed"
         return
     fi
     
     # Create temporary JSON file
     local ruleset_file=$(mktemp)
     
-    cat > "$ruleset_file" << 'EOF'
+    # Get current user ID for bypass configuration
+    local current_user_id=$(gh api user --jq '.id' 2>/dev/null || echo "")
+    local current_user=$(gh api user --jq '.login' 2>/dev/null || echo "")
+    
+    cat > "$ruleset_file" << EOF
 {
   "name": "Main Branch Protection",
   "target": "branch",
@@ -192,18 +287,8 @@ create_ruleset() {
         "require_last_push_approval": false,
         "dismiss_stale_reviews_on_push": true,
         "required_approving_review_count": 1,
-        "required_review_thread_resolution": false
-      }
-    },
-    {
-      "type": "required_status_checks",
-      "parameters": {
-        "required_status_checks": [
-          {
-            "context": "test"
-          }
-        ],
-        "strict_required_status_checks_policy": true
+        "required_review_thread_resolution": false,
+        "allowed_merge_methods": ["rebase"]
       }
     },
     {
@@ -213,36 +298,45 @@ create_ruleset() {
       "type": "required_linear_history"
     }
   ],
-  "bypass_actors": []
+  "bypass_actors": [
+    {
+      "actor_type": "RepositoryRole",
+      "bypass_mode": "always",
+      "actor_id": 5
+    }
+  ]
 }
 EOF
     
     # Apply ruleset
+    local ruleset_error_file=$(mktemp)
     {
         gh api -X POST repos/${OWNER}/${REPO_NAME}/rulesets \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             --input "$ruleset_file" \
-            &> /dev/null
+            > /dev/null 2>"$ruleset_error_file"
+        echo $? > "${ruleset_error_file}.exit"
     } &
     local pid=$!
     spinner $pid "Creating branch protection ruleset..."
     wait $pid
-    local exit_code=$?
+    local exit_code=$(cat "${ruleset_error_file}.exit" 2>/dev/null || echo "1")
     
     if [[ $exit_code -eq 0 ]]; then
         success "Branch protection ruleset created"
         echo " Target branch: main"
         echo " Pull requests: required (1 approval)"
-        echo " Status checks: test pipeline required"
+        echo " Merge methods: rebase only (ruleset level)"
         echo " Linear history: enforced"
         echo " Force pushes: blocked"
         echo " Stale reviews: auto-dismissed"
+        echo " Bypass: repository admins allowed"
     else
-        warning "Branch protection failed (may already exist)"
+        log_error "Branch protection ruleset" "$ruleset_error_file"
     fi
     
-    rm -f "$ruleset_file"
+    rm -f "$ruleset_file" "$ruleset_error_file" "${ruleset_error_file}.exit"
 }
 
 # Check secrets
