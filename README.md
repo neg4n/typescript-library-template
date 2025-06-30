@@ -2,6 +2,8 @@
 
 An opinionated production-ready TypeScript library template with automated builds, testing, and releases.
 
+<img width="380" src="https://github.com/user-attachments/assets/e3ecf54c-13c4-4baa-a253-d2861d4bf4e9" />
+
 ## Features
 
 - 📦 **Dual Package Support** - Outputs CommonJS and ESM builds
