@@ -32,7 +32,27 @@ An opinionated production-ready TypeScript library template with automated build
 
 ## Setup
 
-### 1. Quick Start
+### 1. Use the template
+
+Run this in your terminal _[GitHub CLI](https://cli.github.com) required_
+
+```bash
+gh repo create my-typescript-library --clone --template neg4n/typescript-library-template --private && cd my-test-library
+```
+
+> [!NOTE]
+> Replace `my-typescript-library` with your new library name, you can also change the visiblity of the newly created repo by passing `--public` instead of `--private`! Read more about possible options in [GitHub CLI documentation](https://cli.github.com/manual/gh_repo_create)
+
+#### Setup via GitHub web interface
+
+If for some reason you can't run the mentioned commands in your terminal, click the "Use this template ▾" button below (or in the top right corner of the repository page)
+
+<a href="https://github.com/new?template_name=typescript-library-template&template_owner=neg4n">
+<img src="https://github.com/user-attachments/assets/784be0dd-530f-4135-b042-ab59dc9124a6" width="200" />
+</a>
+
+
+### 2. Minimal Setup
 
 Run the initialization script to automatically configure your repository:
 
@@ -49,7 +69,7 @@ This script will:
 - 🔧 **Verify GitHub Actions** and validate repository configuration
 - 🔑 **Check required secrets** and provide setup instructions
 
-### 2. Required Secrets
+### 3. Required Secrets
 
 The script will guide you to set up these secrets if missing:
 
