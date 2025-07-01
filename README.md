@@ -39,7 +39,7 @@ An opinionated production-ready TypeScript library template with automated build
 Run this in your terminal _[GitHub CLI](https://cli.github.com) required_
 
 ```bash
-gh repo create my-typescript-library --clone --template neg4n/typescript-library-template --private && cd my-test-library
+gh repo create my-typescript-library --clone --template neg4n/typescript-library-template --private && cd my-typescript-library
 ```
 
 > [!NOTE]
